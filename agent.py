@@ -30,7 +30,15 @@ class RandomAgent(Agent):
             return np.random.rand() < 0.1  # probability of continuing
 
 
-class QAgent(Agent):
+class RLAgent(Agent):
+    @classmethod
+    def from_txt(cls):
+        agent = RLAgent()
+        agent.n = np.loadtxt("n.csv")
+        agent.v = np.loadtxt("v.csv")
+
+        return agent
+
     def __init__(self, verbose=False):
         super().__init__()
 
@@ -82,13 +90,18 @@ class QAgent(Agent):
     def eval(self, obs):
         return [self.v[s[0]-1, s[1] // 50] for s in obs]
 
-    def bestAction(self, obs):
+    def bestAction(self, obs, verbose=False):
         if type(obs) == list:
+            if verbose:
+                print("Value of continuing with each action:")
+                print(self.eval(obs))
             if max(self.eval(obs)) <= max([s[1] for s in obs]):
                 return np.argmax([s[1] for s in obs])  # if nothing is good for continuing, I break
             else:
                 return np.argmax(self.eval(obs))
         else:
+            if verbose:
+                print("Value of continuing:", self.v[obs[0]-1, obs[1] // 50])
             return self.v[obs[0]-1, obs[1] // 50] > obs[1]
 
 
@@ -97,7 +110,7 @@ if __name__ == "__main__":
     agent = RandomAgent()
     print("Random agent performance", agent.play(env, 50000))
 
-    agent = QAgent(verbose=False)
+    agent = RLAgent(verbose=False)
     print("Starting agent performance", agent.play(env, 50000))
 
     print("Training...")

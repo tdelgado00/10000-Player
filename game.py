@@ -5,7 +5,6 @@ EPSILON = 0.1
 
 # Environmnent for one turn of the TenThousand game (we don't consider the distance to the 10000 mark)
 class TenThousand:
-
     def __init__(self, verbose=False):
         self.points = None
         self.to_throw = None
@@ -24,8 +23,9 @@ class TenThousand:
             return None
         return self.afterstates
 
-    def throw_dice(self):
-        dice = np.random.randint(6, size=self.to_throw) + 1
+    def throw_dice(self, dice=None):
+        if dice is None:
+            dice = np.random.randint(6, size=self.to_throw) + 1
 
         if self.verbose:
             print("Dice throw!", dice)
@@ -78,7 +78,7 @@ class TenThousand:
 
         self.dice_thrown = True
 
-    def step(self, a):
+    def step(self, a, dice=None):
         if self.dice_thrown:
             assert a < len(self.afterstates)
 
@@ -97,7 +97,7 @@ class TenThousand:
             else:
                 if self.verbose:
                     print("Continuing")
-                self.throw_dice()
+                self.throw_dice(dice=dice)
                 if len(self.afterstates) == 0:
                     if self.verbose:
                         print("Lost everything")
@@ -105,12 +105,10 @@ class TenThousand:
                     return None
                 return self.afterstates
 
-    def reset(self):
-        if self.verbose:
-            print("Starting turn *****************")
+    def reset(self, dice=None):
         self.points = 0
         self.to_throw = 5
-        self.throw_dice()
+        self.throw_dice(dice=dice)
         if len(self.afterstates) == 0:
             self.score = 0
             return None
